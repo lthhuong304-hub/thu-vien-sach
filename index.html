@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thư viện văn học của tôi</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    :root { --bg: #f5f1e8; --card: #ffffff; --text: #2b2926; --muted: #767067; --accent: #2c5e4f; --border: #e2dcd0; }
+    body.dark { --bg: #161616; --card: #222222; --text: #e6e2d8; --muted: #9e988e; --border: #333333; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--text); transition: background 0.25s, color 0.25s; }
+    header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+    .brand { font-size: 20px; font-weight: bold; letter-spacing: 0.3px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    button, .btn { cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 7px 14px; border-radius: 20px; font-size: 13px; font-family: inherit; transition: 0.15s; }
+    button:hover, .btn:hover { opacity: 0.85; }
+    button.primary, button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tabs { display: flex; gap: 8px; padding: 16px 24px 8px; flex-wrap: wrap; max-width: 1120px; margin: 0 auto; }
+    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 24px; padding: 16px 24px 48px; max-width: 1120px; margin: 0 auto; }
+    .book-card { cursor: pointer; transition: transform 0.25s; }
+    .book-card:hover { transform: translateY(-6px); }
+    .cover { height: 235px; border-radius: 4px 10px 10px 4px; padding: 18px 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-shadow: inset 10px 0 18px rgba(0,0,0,0.28), 6px 8px 16px rgba(0,0,0,0.18); background-size: cover; background-position: center; }
+    .cover.has-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.15)); }
+    .cover > * { position: relative; z-index: 1; }
+    .cover h3 { margin: 0; font-size: 17px; line-height: 1.35; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+    .cover small { font-size: 12px; opacity: 0.92; }
+    .book-meta { padding: 8px 2px; font-size: 12.5px; color: var(--muted); }
+    /* Modal */
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; align-items: center; justify-content: center; padding: 16px; }
+    .modal-bg.open { display: flex; }
+    .modal { background: var(--card); color: var(--text); max-width: 480px; width: 100%; border-radius: 14px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); max-height: 90vh; overflow-y: auto; }
+    /* Reader */
+    #reader { display: none; max-width: 780px; margin: 0 auto; padding: 16px 20px 40px; }
+    .reader-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .book-spread { background: var(--card); border-radius: 10px; padding: 34px 36px; min-height: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.12), inset 14px 0 24px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; }
+    .chapter-title { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px; text-align: center; }
+    .page-content { font-size: 18px; line-height: 1.9; white-space: pre-line; text-align: justify; }
+    .page-flip { animation: flipIn 0.28s ease; }
+    @keyframes flipIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+    .reader-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
+    /* Highlights & Notes */
+    mark { border-radius: 3px; padding: 1px 2px; cursor: pointer; }
+    .hl-yellow { background: #fff3a8; color: #222; }
+    .hl-green { background: #c5f3c8; color: #222; }
+    .hl-pink { background: #ffd1e6; color: #222; }
+    .hl-blue { background: #c7e6ff; color: #222; }
+    #hlBar { display: none; position: fixed; z-index: 60; background: var(--card); border: 1px solid var(--border); padding: 6px 10px; border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); gap: 6px; align-items: center; }
+    #hlBar.show { display: flex; }
+    .note-list { margin-top: 18px; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; }
+    .note-item { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 10px; }
+    .note-item:last-child { border-bottom: none; }
+    input[type="text"], textarea, select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">📚 Thư viện văn học</div>
+    <div class="controls">
+      <button onclick="openPdfModal()">＋ Thêm sách PDF</button>
+      <button id="pianoBtn" onclick="togglePiano()">♫ Piano nhẹ nhàng</button>
+      <label class="btn">＋ Nhạc MP3 <input type="file" id="musicInput" accept="audio/*" multiple hidden></label>
+      <button onclick="document.body.classList.toggle('dark')">☾ Sáng/Tối</button>
+    </div>
+  </header>
+  <audio id="bgAudio" controls style="display:none; width:100%;"></audio>
+
+  <div id="libraryView">
+    <div class="tabs" id="tabs"></div>
+    <div class="shelf" id="shelf"></div>
+  </div>
+
+  <div id="reader">
+    <div class="reader-top">
+      <button onclick="closeReader()">← Về kệ sách</button>
+      <select id="chapterSelect" onchange="goChapter(this.value)" style="width:auto; max-width:220px; margin:0;"></select>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button onclick="saveBookmark()">🔖 Đánh dấu</button>
+        <button onclick="goBookmark()">↪ Tới dấu trang</button>
+        <button onclick="clearBookmark()">✕ Bỏ dấu</button>
+      </div>
+    </div>
+    <div class="book-spread" id="bookSpread">
+      <div class="chapter-title" id="chTitle"></div>
+      <div class="page-content" id="pageContent"></div>
+    </div>
+    <div class="reader-bottom">
+      <button onclick="turnPage(-1)">◀ Trang trước</button>
+      <span id="pageInfo" style="font-size:14px; color:var(--muted);"></span>
+      <button onclick="turnPage(1)">Trang sau ▶</button>
+    </div>
+    <div class="note-list" id="noteList" style="display:none;"></div>
+  </div>
+
+  <!-- Thanh highlight khi bôi đen chữ -->
+  <div id="hlBar">
+    <button onclick="applyHL('yellow')">🟡</button>
+    <button onclick="applyHL('green')">🟢</button>
+    <button onclick="applyHL('pink')">🌸</button>
+    <button onclick="applyHL('blue')">🔵</button>
+    <button onclick="hideHLBar()">✕</button>
+  </div>
+
+  <!-- Hộp thoại xem trước sách -->
+  <div class="modal-bg" id="previewModal">
+    <div class="modal" id="previewBody"></div>
+  </div>
+
+  <!-- Hộp thoại thêm PDF cá nhân -->
+  <div class="modal-bg" id="pdfModal">
+    <div class="modal">
+      <h3 style="margin-top:0;">＋ Thêm sách PDF cá nhân</h3>
+      <p style="font-size:13px; color:var(--muted);">Sách lưu trực tiếp trên trình duyệt này (không tải lên máy chủ).</p>
+      <label style="font-size:13px;">Chọn file PDF có văn bản:</label>
+      <input type="file" id="pdfFile" accept="application/pdf" style="margin:6px 0 12px;">
+      <label style="font-size:13px;">Tên sách:</label>
+      <input type="text" id="pdfTitle" placeholder="Nhập tên sách...">
+      <label style="font-size:13px; display:block; margin-top:10px;">Tác giả:</label>
+      <input type="text" id="pdfAuthor" placeholder="Nhập tên tác giả...">
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button onclick="closeModal('pdfModal')">Đóng</button>
+        <button class="primary" id="savePdfBtn" onclick="importPDF()">✓ Lưu vào kệ</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="books.js"></script>
+  <script>
+    if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    let userBooks = [], currentCat = "Tất cả", currentBook = null, chIdx = 0, pageIdx = 0, pages = [], selectedText = "";
+    const cats = ["Tất cả", "Của tôi", "Bạn bè", "Sách hay", "Sách của bạn"];
+
+    // --- IndexedDB cho sách PDF cá nhân ---
+    function openDB() {
+      return new Promise((res, rej) => {
+        const req = indexedDB.open("MyLibraryDB", 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore("books", { keyPath: "id" });
+        req.onsuccess = e => res(e.target.result);
+        req.onerror = e => rej(e);
+      });
+    }
+    async function loadUserBooks() {
+      const db = await openDB();
+      return new Promise(res => {
+        const req = db.transaction("books", "readonly").objectStore("books").getAll();
+        req.onsuccess = () => { userBooks = req.result || []; renderShelf(); };
+      });
+    }
+    async function saveUserBook(book) {
+      const db = await openDB();
+      db.transaction("books", "readwrite").objectStore("books").put(book);
+    }
+    async function removeUserBook(id) {
+      const db = await openDB();
+      db.transaction("books", "readwrite").objectStore("books").delete(id);
+      userBooks = userBooks.filter(b => b.id !== id);
+      closeModal("previewModal");
+      renderShelf();
+    }
+
+    // --- Kệ sách & Xem trước ---
+    function allBooks() { return [...(typeof BOOKS !== "undefined" ? BOOKS : []), ...userBooks]; }
+    function renderTabs() {
+      document.getElementById("tabs").innerHTML = cats.map(c =>
+        `<button class="${c === currentCat ? 'active' : ''}" onclick="currentCat='${c}';renderTabs();renderShelf();">${c}</button>`
+      ).join("");
+    }
+    function renderShelf() {
+      const list = currentCat === "Tất cả" ? allBooks() : allBooks().filter(b => b.category === currentCat);
+      document.getElementById("shelf").innerHTML = list.length ? list.map(b => {
+        const style = b.cover ? `background-image:url('${b.cover}')` : `background:${b.color || '#2c5e4f'}`;
+        return `
+          <div class="book-card" onclick="openPreview('${b.id}')">
+            <div class="cover ${b.cover ? 'has-img' : ''}" style="${style}">
+              <h3>${b.title}</h3>
+              <small>${b.author}</small>
+            </div>
+            <div class="book-meta">${b.category} · ${b.year || ''}</div>
+          </div>`;
+      }).join("") : `<p style="color:var(--muted);">Chưa có sách trong mục này.</p>`;
+    }
+
+    function openPreview(id) {
+      const b = allBooks().find(x => x.id === id);
+      const recent = localStorage.getItem("recent_" + id);
+      const delBtn = b.isLocal ? `<button onclick="removeUserBook('${b.id}')" style="color:#c0392b;">Xóa sách</button>` : "";
+      document.getElementById("previewBody").innerHTML = `
+        <h2 style="margin-top:0;">${b.title}</h2>
+        <p style="color:var(--muted); margin:4px 0 12px;">Tác giả: <strong>${b.author}</strong> · ${b.year || ''}</p>
+        <p style="line-height:1.6;">${b.description || 'Tác phẩm lưu trữ trong thư viện cá nhân.'}</p>
+        ${recent ? `<p style="font-size:13px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(recent).ch + 1}, Trang ${JSON.parse(recent).p + 1}</p>` : ''}
+        <div style="display:flex; justify-content:space-between; margin-top:20px; gap:8px;">
+          ${delBtn}
+          <div style="display:flex; gap:8px; margin-left:auto;">
+            <button onclick="closeModal('previewModal')">Đóng</button>
+            <button class="primary" onclick="closeModal('previewModal');startReading('${b.id}')">Đọc ngay</button>
+          </div>
+        </div>`;
+      document.getElementById("previewModal").classList.add("open");
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+
+    // --- Trình đọc sách & Lật trang ---
+    function paginate(text, wordsPerPage = 210) {
+      const words = (text || "").trim().split(/\s+/);
+      const out = [];
+      for (let i = 0; i < words.length; i += wordsPerPage) out.push(words.slice(i, i + wordsPerPage).join(" "));
+      return out.length ? out : [""];
+    }
+    function startReading(id) {
+      currentBook = allBooks().find(b => b.id === id);
+      const saved = JSON.parse(localStorage.getItem("recent_" + id) || '{"ch":0,"p":0}');
+      chIdx = saved.ch; pageIdx = saved.p;
+      document.getElementById("chapterSelect").innerHTML = currentBook.chapters.map((c, i) => `<option value="${i}">${c.title}</option>`).join("");
+      document.getElementById("libraryView").style.display = "none";
+      document.getElementById("reader").style.display = "block";
+      renderPage();
+    }
+    function esc(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+    function getHLKey() { return `hl_${currentBook.id}_${chIdx}_${pageIdx}`; }
+
+    function renderPage() {
+      document.getElementById("chapterSelect").value = chIdx;
+      const ch = currentBook.chapters[chIdx];
+      pages = paginate(ch.content);
+      if (pageIdx >= pages.length) pageIdx = 0;
+      document.getElementById("chTitle").textContent = `${currentBook.title} — ${ch.title}`;
+
+      let html = esc(pages[pageIdx]);
+      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
+      hls.forEach((h, i) => {
+        const safeText = esc(h.text);
+        if (html.includes(safeText)) {
+          html = html.replace(safeText, `<mark class="hl-${h.color}" onclick="deleteHL(${i})" title="Bấm để xóa highlight">${safeText}${h.note ? ' 📝' : ''}</mark>`);
+        }
+      });
+
+      const el = document.getElementById("pageContent");
+      el.innerHTML = html;
+      const spread = document.getElementById("bookSpread");
+      spread.classList.remove("page-flip"); void spread.offsetWidth; spread.classList.add("page-flip");
+
+      document.getElementById("pageInfo").textContent = `Trang ${pageIdx + 1} / ${pages.length}`;
+      localStorage.setItem("recent_" + currentBook.id, JSON.stringify({ ch: chIdx, p: pageIdx }));
+      renderNotes(hls);
+    }
+
+    function renderNotes(hls) {
+      const box = document.getElementById("noteList");
+      const withNotes = hls.map((h, i) => ({ ...h, idx: i })).filter(h => h.note);
+      if (!withNotes.length) { box.style.display = "none"; return; }
+      box.style.display = "block";
+      box.innerHTML = `<strong>✎ Ghi chú ở trang này:</strong>` + withNotes.map(h =>
+        `<div class="note-item"><span>"${h.text.slice(0,40)}..." → <em>${h.note}</em></span><button onclick="deleteHL(${h.idx})">✕</button></div>`
+      ).join("");
+    }
+
+    function goChapter(i) { chIdx = Number(i); pageIdx = 0; renderPage(); }
+    function turnPage(d) {
+      if (pageIdx + d >= 0 && pageIdx + d < pages.length) { pageIdx += d; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); }
+      else if (d > 0 && chIdx + 1 < currentBook.chapters.length) { chIdx++; pageIdx = 0; renderPage(); }
+      else if (d < 0 && chIdx > 0) { chIdx--; pages = paginate(currentBook.chapters[chIdx].content); pageIdx = pages.length - 1; renderPage(); }
+    }
+    function closeReader() { document.getElementById("reader").style.display = "none"; document.getElementById("libraryView").style.display = "block"; renderShelf(); }
+
+    // --- Đánh dấu trang ---
+    function saveBookmark() {
+      const note = prompt("Ghi chú cho dấu trang (có thể để trống):", "") || "";
+      localStorage.setItem("bm_" + currentBook.id, JSON.stringify({ ch: chIdx, p: pageIdx, note }));
+      alert("🔖 Đã đánh dấu trang này!");
+    }
+    function goBookmark() {
+      const bm = JSON.parse(localStorage.getItem("bm_" + currentBook.id) || "null");
+      if (!bm) return alert("Chưa có dấu trang nào cho sách này.");
+      chIdx = bm.ch; pageIdx = bm.p; renderPage();
+      if (bm.note) alert("✎ Ghi chú dấu trang: " + bm.note);
+    }
+    function clearBookmark() { localStorage.removeItem("bm_" + currentBook.id); alert("Đã bỏ dấu trang."); }
+
+    // --- Highlight & Note ---
+    document.getElementById("pageContent").addEventListener("mouseup", e => {
+      const sel = window.getSelection().toString().trim();
+      if (sel.length > 1) {
+        selectedText = sel;
+        const bar = document.getElementById("hlBar");
+        bar.style.left = Math.min(e.clientX, window.innerWidth - 220) + "px";
+        bar.style.top = Math.max(10, e.clientY - 48) + "px";
+        bar.classList.add("show");
+      }
+    });
+    function hideHLBar() { document.getElementById("hlBar").classList.remove("show"); }
+    function applyHL(color) {
+      const note = prompt("Thêm ghi chú cho đoạn này (bỏ trống nếu chỉ tô màu):", "") || "";
+      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
+      hls.push({ text: selectedText, color, note });
+      localStorage.setItem(getHLKey(), JSON.stringify(hls));
+      hideHLBar();
+      window.getSelection().removeAllRanges();
+      renderPage();
+    }
+    function deleteHL(idx) {
+      if (!confirm("Xóa highlight và ghi chú này?")) return;
+      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
+      hls.splice(idx, 1);
+      localStorage.setItem(getHLKey(), JSON.stringify(hls));
+      renderPage();
+    }
+
+    // --- Nhập PDF cá nhân ---
+    function openPdfModal() { document.getElementById("pdfModal").classList.add("open"); }
+    async function importPDF() {
+      const file = document.getElementById("pdfFile").files[0];
+      if (!file) return alert("Vui lòng chọn 1 file PDF!");
+      const btn = document.getElementById("savePdfBtn"); btn.textContent = "Đang xử lý...";
+      try {
+        const buf = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          fullText += content.items.map(it => it.str).join(" ") + "\n\n";
+        }
+        const book = {
+          id: "pdf_" + Date.now(),
+          title: document.getElementById("pdfTitle").value.trim() || file.name.replace(".pdf", ""),
+          author: document.getElementById("pdfAuthor").value.trim() || "Cá nhân",
+          year: new Date().getFullYear(),
+          category: "Sách của bạn",
+          color: "#4a6572",
+          isLocal: true,
+          chapters: [{ title: "Toàn văn", content: fullText }]
+        };
+        await saveUserBook(book);
+        userBooks.push(book);
+        closeModal("pdfModal");
+        currentCat = "Sách của bạn"; renderTabs(); renderShelf();
+      } catch (err) { alert("Không đọc được file PDF này (có thể là PDF dạng ảnh scan)."); }
+      btn.textContent = "✓ Lưu vào kệ";
+    }
+
+    // --- Nhạc nền Piano nhẹ nhàng + MP3 ---
+    let pianoTimer = null, audioCtx = null;
+    function togglePiano() {
+      const btn = document.getElementById("pianoBtn");
+      if (pianoTimer) { clearInterval(pianoTimer); pianoTimer = null; btn.textContent = "♫ Piano nhẹ nhàng"; return; }
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
+      let step = 0;
+      pianoTimer = setInterval(() => {
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = "sine"; osc.frequency.value = notes[(step++ * 3) % notes.length];
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 1.5);
+      }, 900);
+      btn.textContent = "⏸ Tạm dừng Piano";
+    }
+    document.getElementById("musicInput").addEventListener("change", e => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      let idx = 0; const audio = document.getElementById("bgAudio");
+      audio.style.display = "block";
+      const playIdx = i => { audio.src = URL.createObjectURL(files[i]); audio.play(); };
+      audio.onended = () => { idx = (idx + 1) % files.length; playIdx(idx); };
+      playIdx(0);
+    });
+
+    // Phím mũi tên để lật trang
+    document.addEventListener("keydown", e => {
+      if (document.getElementById("reader").style.display === "block") {
+        if (e.key === "ArrowRight") turnPage(1);
+        if (e.key === "ArrowLeft") turnPage(-1);
+      }
+    });
+
+    renderTabs();
+    renderShelf();
+    loadUserBooks();
+  </script>
+</body>
+</html>
