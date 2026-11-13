@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thư viện văn học của tôi</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root { --bg: #f5f1e8; --card: #ffffff; --text: #2b2926; --muted: #767067; --accent: #2c5e4f; --border: #e2dcd0; }
     body.dark { --bg: #161616; --card: #222222; --text: #e6e2d8; --muted: #9e988e; --border: #333333; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Times New Roman", serif; background: var(--bg); color: var(--text); transition: background 0.25s, color 0.25s; }
+    body { margin: 0; font-family: "Times New Roman", system-ui, serif; background: var(--bg); color: var(--text); transition: background 0.25s, color 0.25s; }
     header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
     .brand { font-size: 20px; font-weight: bold; letter-spacing: 0.3px; }
     .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -26,11 +27,9 @@
     .cover h3 { margin: 0; font-size: 17px; line-height: 1.35; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
     .cover small { font-size: 12px; opacity: 0.92; }
     .book-meta { padding: 8px 2px; font-size: 12.5px; color: var(--muted); }
-    /* Modal */
     .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; align-items: center; justify-content: center; padding: 16px; }
     .modal-bg.open { display: flex; }
     .modal { background: var(--card); color: var(--text); max-width: 480px; width: 100%; border-radius: 14px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); max-height: 90vh; overflow-y: auto; }
-    /* Reader */
     #reader { display: none; max-width: 780px; margin: 0 auto; padding: 16px 20px 40px; }
     .reader-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
     .book-spread { background: var(--card); border-radius: 10px; padding: 34px 36px; min-height: 440px; box-shadow: 0 10px 30px rgba(0,0,0,0.12), inset 14px 0 24px rgba(0,0,0,0.03); border: 1px solid var(--border); position: relative; }
@@ -39,7 +38,6 @@
     .page-flip { animation: flipIn 0.28s ease; }
     @keyframes flipIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
     .reader-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
-    /* Highlights & Notes */
     mark { border-radius: 3px; padding: 1px 2px; cursor: pointer; }
     .hl-yellow { background: #fff3a8; color: #222; }
     .hl-green { background: #c5f3c8; color: #222; }
@@ -57,7 +55,7 @@
   <header>
     <div class="brand">📚 Thư viện văn học</div>
     <div class="controls">
-      <button onclick="openPdfModal()">＋ Thêm sách PDF</button>
+      <button onclick="openBookModal()">＋ Thêm sách (PDF / EPUB)</button>
       <button id="pianoBtn" onclick="togglePiano()">♫ Piano nhẹ nhàng</button>
       <label class="btn">＋ Nhạc MP3 <input type="file" id="musicInput" accept="audio/*" multiple hidden></label>
       <button onclick="document.body.classList.toggle('dark')">☾ Sáng/Tối</button>
@@ -92,7 +90,6 @@
     <div class="note-list" id="noteList" style="display:none;"></div>
   </div>
 
-  <!-- Thanh highlight khi bôi đen chữ -->
   <div id="hlBar">
     <button onclick="applyHL('yellow')">🟡</button>
     <button onclick="applyHL('green')">🟢</button>
@@ -101,25 +98,23 @@
     <button onclick="hideHLBar()">✕</button>
   </div>
 
-  <!-- Hộp thoại xem trước sách -->
   <div class="modal-bg" id="previewModal">
     <div class="modal" id="previewBody"></div>
   </div>
 
-  <!-- Hộp thoại thêm PDF cá nhân -->
-  <div class="modal-bg" id="pdfModal">
+  <div class="modal-bg" id="bookModal">
     <div class="modal">
-      <h3 style="margin-top:0;">＋ Thêm sách PDF cá nhân</h3>
+      <h3 style="margin-top:0;">＋ Thêm sách PDF hoặc EPUB</h3>
       <p style="font-size:13px; color:var(--muted);">Sách lưu trực tiếp trên trình duyệt này (không tải lên máy chủ).</p>
-      <label style="font-size:13px;">Chọn file PDF có văn bản:</label>
-      <input type="file" id="pdfFile" accept="application/pdf" style="margin:6px 0 12px;">
-      <label style="font-size:13px;">Tên sách:</label>
-      <input type="text" id="pdfTitle" placeholder="Nhập tên sách...">
+      <label style="font-size:13px;">Chọn file (.pdf hoặc .epub):</label>
+      <input type="file" id="bookFile" accept=".pdf,.epub,application/pdf,application/epub+zip" style="margin:6px 0 12px;">
+      <label style="font-size:13px;">Tên sách (bỏ trống để tự lấy từ file):</label>
+      <input type="text" id="bookTitle" placeholder="Nhập tên sách...">
       <label style="font-size:13px; display:block; margin-top:10px;">Tác giả:</label>
-      <input type="text" id="pdfAuthor" placeholder="Nhập tên tác giả...">
+      <input type="text" id="bookAuthor" placeholder="Nhập tên tác giả...">
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
-        <button onclick="closeModal('pdfModal')">Đóng</button>
-        <button class="primary" id="savePdfBtn" onclick="importPDF()">✓ Lưu vào kệ</button>
+        <button onclick="closeModal('bookModal')">Đóng</button>
+        <button class="primary" id="saveBookBtn" onclick="importBook()">✓ Lưu vào kệ</button>
       </div>
     </div>
   </div>
@@ -131,7 +126,6 @@
     let userBooks = [], currentCat = "Tất cả", currentBook = null, chIdx = 0, pageIdx = 0, pages = [], selectedText = "";
     const cats = ["Tất cả", "Của tôi", "Bạn bè", "Sách hay", "Sách của bạn"];
 
-    // --- IndexedDB cho sách PDF cá nhân ---
     function openDB() {
       return new Promise((res, rej) => {
         const req = indexedDB.open("MyLibraryDB", 1);
@@ -142,10 +136,8 @@
     }
     async function loadUserBooks() {
       const db = await openDB();
-      return new Promise(res => {
-        const req = db.transaction("books", "readonly").objectStore("books").getAll();
-        req.onsuccess = () => { userBooks = req.result || []; renderShelf(); };
-      });
+      const req = db.transaction("books", "readonly").objectStore("books").getAll();
+      req.onsuccess = () => { userBooks = req.result || []; renderShelf(); };
     }
     async function saveUserBook(book) {
       const db = await openDB();
@@ -159,7 +151,6 @@
       renderShelf();
     }
 
-    // --- Kệ sách & Xem trước ---
     function allBooks() { return [...(typeof BOOKS !== "undefined" ? BOOKS : []), ...userBooks]; }
     function renderTabs() {
       document.getElementById("tabs").innerHTML = cats.map(c =>
@@ -189,7 +180,7 @@
         <h2 style="margin-top:0;">${b.title}</h2>
         <p style="color:var(--muted); margin:4px 0 12px;">Tác giả: <strong>${b.author}</strong> · ${b.year || ''}</p>
         <p style="line-height:1.6;">${b.description || 'Tác phẩm lưu trữ trong thư viện cá nhân.'}</p>
-        ${recent ? `<p style="font-size:13px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(recent).ch + 1}, Trang ${JSON.parse(recent).p + 1}</p>` : ''}
+        ${recent ? `<p style="font-size:13px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(recent).ch + 1}, Trang${JSON.parse(recent).p + 1}</p>` : ''}
         <div style="display:flex; justify-content:space-between; margin-top:20px; gap:8px;">
           ${delBtn}
           <div style="display:flex; gap:8px; margin-left:auto;">
@@ -201,7 +192,6 @@
     }
     function closeModal(id) { document.getElementById(id).classList.remove("open"); }
 
-    // --- Trình đọc sách & Lật trang ---
     function paginate(text, wordsPerPage = 210) {
       const words = (text || "").trim().split(/\s+/);
       const out = [];
@@ -211,7 +201,8 @@
     function startReading(id) {
       currentBook = allBooks().find(b => b.id === id);
       const saved = JSON.parse(localStorage.getItem("recent_" + id) || '{"ch":0,"p":0}');
-      chIdx = saved.ch; pageIdx = saved.p;
+      chIdx = Math.min(saved.ch, currentBook.chapters.length - 1);
+      pageIdx = saved.p;
       document.getElementById("chapterSelect").innerHTML = currentBook.chapters.map((c, i) => `<option value="${i}">${c.title}</option>`).join("");
       document.getElementById("libraryView").style.display = "none";
       document.getElementById("reader").style.display = "block";
@@ -236,8 +227,7 @@
         }
       });
 
-      const el = document.getElementById("pageContent");
-      el.innerHTML = html;
+      document.getElementById("pageContent").innerHTML = html;
       const spread = document.getElementById("bookSpread");
       spread.classList.remove("page-flip"); void spread.offsetWidth; spread.classList.add("page-flip");
 
@@ -259,12 +249,11 @@
     function goChapter(i) { chIdx = Number(i); pageIdx = 0; renderPage(); }
     function turnPage(d) {
       if (pageIdx + d >= 0 && pageIdx + d < pages.length) { pageIdx += d; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); }
-      else if (d > 0 && chIdx + 1 < currentBook.chapters.length) { chIdx++; pageIdx = 0; renderPage(); }
-      else if (d < 0 && chIdx > 0) { chIdx--; pages = paginate(currentBook.chapters[chIdx].content); pageIdx = pages.length - 1; renderPage(); }
+      else if (d > 0 && chIdx + 1 < currentBook.chapters.length) { chIdx++; pageIdx = 0; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); }
+      else if (d < 0 && chIdx > 0) { chIdx--; pages = paginate(currentBook.chapters[chIdx].content); pageIdx = pages.length - 1; renderPage(); window.scrollTo({top:0, behavior:'smooth'}); }
     }
     function closeReader() { document.getElementById("reader").style.display = "none"; document.getElementById("libraryView").style.display = "block"; renderShelf(); }
 
-    // --- Đánh dấu trang ---
     function saveBookmark() {
       const note = prompt("Ghi chú cho dấu trang (có thể để trống):", "") || "";
       localStorage.setItem("bm_" + currentBook.id, JSON.stringify({ ch: chIdx, p: pageIdx, note }));
@@ -278,7 +267,6 @@
     }
     function clearBookmark() { localStorage.removeItem("bm_" + currentBook.id); alert("Đã bỏ dấu trang."); }
 
-    // --- Highlight & Note ---
     document.getElementById("pageContent").addEventListener("mouseup", e => {
       const sel = window.getSelection().toString().trim();
       if (sel.length > 1) {
@@ -307,78 +295,42 @@
       renderPage();
     }
 
-    // --- Nhập PDF cá nhân ---
-    function openPdfModal() { document.getElementById("pdfModal").classList.add("open"); }
-    async function importPDF() {
-      const file = document.getElementById("pdfFile").files[0];
-      if (!file) return alert("Vui lòng chọn 1 file PDF!");
-      const btn = document.getElementById("savePdfBtn"); btn.textContent = "Đang xử lý...";
-      try {
-        const buf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
-        let fullText = "";
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          fullText += content.items.map(it => it.str).join(" ") + "\n\n";
-        }
-        const book = {
-          id: "pdf_" + Date.now(),
-          title: document.getElementById("pdfTitle").value.trim() || file.name.replace(".pdf", ""),
-          author: document.getElementById("pdfAuthor").value.trim() || "Cá nhân",
-          year: new Date().getFullYear(),
-          category: "Sách của bạn",
-          color: "#4a6572",
-          isLocal: true,
-          chapters: [{ title: "Toàn văn", content: fullText }]
-        };
-        await saveUserBook(book);
-        userBooks.push(book);
-        closeModal("pdfModal");
-        currentCat = "Sách của bạn"; renderTabs(); renderShelf();
-      } catch (err) { alert("Không đọc được file PDF này (có thể là PDF dạng ảnh scan)."); }
-      btn.textContent = "✓ Lưu vào kệ";
-    }
-
-    // --- Nhạc nền Piano nhẹ nhàng + MP3 ---
-    let pianoTimer = null, audioCtx = null;
-    function togglePiano() {
-      const btn = document.getElementById("pianoBtn");
-      if (pianoTimer) { clearInterval(pianoTimer); pianoTimer = null; btn.textContent = "♫ Piano nhẹ nhàng"; return; }
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25];
-      let step = 0;
-      pianoTimer = setInterval(() => {
-        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-        osc.type = "sine"; osc.frequency.value = notes[(step++ * 3) % notes.length];
-        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + 1.5);
-      }, 900);
-      btn.textContent = "⏸ Tạm dừng Piano";
-    }
-    document.getElementById("musicInput").addEventListener("change", e => {
-      const files = Array.from(e.target.files);
-      if (!files.length) return;
-      let idx = 0; const audio = document.getElementById("bgAudio");
-      audio.style.display = "block";
-      const playIdx = i => { audio.src = URL.createObjectURL(files[i]); audio.play(); };
-      audio.onended = () => { idx = (idx + 1) % files.length; playIdx(idx); };
-      playIdx(0);
-    });
-
-    // Phím mũi tên để lật trang
-    document.addEventListener("keydown", e => {
-      if (document.getElementById("reader").style.display === "block") {
-        if (e.key === "ArrowRight") turnPage(1);
-        if (e.key === "ArrowLeft") turnPage(-1);
+    // --- Đọc PDF & EPUB ---
+    function openBookModal() { document.getElementById("bookModal").classList.add("open"); }
+    async function parseEPUB(file) {
+      const zip = await JSZip.loadAsync(await file.arrayBuffer());
+      let opfPath = null;
+      const cFile = zip.file("META-INF/container.xml");
+      if (cFile) {
+        const cXml = new DOMParser().parseFromString(await cFile.async("string"), "text/xml");
+        const rf = cXml.querySelector("rootfile");
+        if (rf) opfPath = rf.getAttribute("full-path");
       }
-    });
+      if (!opfPath) opfPath = Object.keys(zip.files).find(k => k.endsWith(".opf"));
+      const baseDir = opfPath && opfPath.includes("/") ? opfPath.slice(0, opfPath.lastIndexOf("/") + 1) : "";
+      const chapters = [];
+      let autoTitle = "", autoAuthor = "";
 
-    renderTabs();
-    renderShelf();
-    loadUserBooks();
-  </script>
-</body>
-</html>
+      if (opfPath && zip.file(opfPath)) {
+        const opfXml = new DOMParser().parseFromString(await zip.file(opfPath).async("string"), "text/xml");
+        const tEl = opfXml.getElementsByTagName("dc:title")[0] || opfXml.querySelector("title");
+        const aEl = opfXml.getElementsByTagName("dc:creator")[0] || opfXml.querySelector("creator");
+        if (tEl) autoTitle = tEl.textContent.trim();
+        if (aEl) autoAuthor = aEl.textContent.trim();
+
+        const manifest = {};
+        opfXml.querySelectorAll("manifest > item").forEach(it => {
+          manifest[it.getAttribute("id")] = decodeURIComponent(it.getAttribute("href") || "");
+        });
+        const spineIds = Array.from(opfXml.querySelectorAll("spine > itemref")).map(ir => ir.getAttribute("idref"));
+        for (const idref of spineIds) {
+          const href = manifest[idref];
+          if (!href) continue;
+          const entry = zip.file(baseDir + href) || zip.file(href);
+          if (!entry) continue;
+          const doc = new DOMParser().parseFromString(await entry.async("string"), "text/html");
+          const h = doc.querySelector("h1, h2, h3, title");
+          const title = (h && h.textContent.trim()) ? h.textContent.trim().slice(0, 80) : `Chương ${chapters.length + 1}`;
+          const paras = Array.from(doc.querySelectorAll("p, h1, h2, h3, h4, li")).map(el => el.textContent.trim()).filter(Boolean);
+          const text = paras.length ? paras.join("\n\n") : (doc.body ? doc.body.textContent.trim() : "");
+          if (text.length > 20) chapters.push({ title
