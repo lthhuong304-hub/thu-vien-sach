@@ -11,38 +11,41 @@
     body.dark { --bg: #161616; --card: #222; --text: #e6e2d8; --muted: #9e988e; --border: #333; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: "Times New Roman", system-ui, serif; background: var(--bg); color: var(--text); transition: 0.25s; }
-    header { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+    header { padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
     .brand { font-size: 20px; font-weight: bold; }
     .controls, .tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .tabs { padding: 16px 24px 8px; max-width: 1120px; margin: 0 auto; }
-    button, .btn { cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 7px 14px; border-radius: 20px; font-size: 13px; font-family: inherit; }
+    .tabs { padding: 14px 24px 6px; max-width: 1120px; margin: 0 auto; }
+    button, .btn { cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 6px 13px; border-radius: 20px; font-size: 13px; font-family: inherit; }
     button.primary, button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 24px; padding: 16px 24px 48px; max-width: 1120px; margin: 0 auto; }
+    .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 22px; padding: 14px 24px 48px; max-width: 1120px; margin: 0 auto; }
     .book-card { cursor: pointer; transition: transform 0.2s; }
-    .book-card:hover { transform: translateY(-6px); }
-    .cover { height: 235px; border-radius: 4px 10px 10px 4px; padding: 18px 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-shadow: inset 10px 0 18px rgba(0,0,0,0.28), 6px 8px 16px rgba(0,0,0,0.18); background-size: cover; background-position: center; }
+    .book-card:hover { transform: translateY(-5px); }
+    .cover { height: 225px; border-radius: 4px 10px 10px 4px; padding: 16px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; box-shadow: inset 10px 0 18px rgba(0,0,0,0.28), 6px 8px 16px rgba(0,0,0,0.18); background-size: cover; background-position: center; }
     .cover.has-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.15)); }
     .cover > * { position: relative; z-index: 1; }
-    .cover h3 { margin: 0; font-size: 17px; line-height: 1.35; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
-    .book-meta { padding: 8px 2px; font-size: 12.5px; color: var(--muted); }
+    .cover h3 { margin: 0; font-size: 16px; line-height: 1.35; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+    .book-meta { padding: 7px 2px; font-size: 12.5px; color: var(--muted); }
     .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 50; align-items: center; justify-content: center; padding: 16px; }
     .modal-bg.open { display: flex; }
     .modal { background: var(--card); color: var(--text); max-width: 480px; width: 100%; border-radius: 14px; padding: 24px; max-height: 90vh; overflow-y: auto; }
-    #reader { display: none; max-width: 780px; margin: 0 auto; padding: 16px 20px 40px; }
-    .reader-top, .reader-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
-    .book-spread { background: var(--card); border-radius: 10px; padding: 34px 36px; min-height: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.12), inset 14px 0 24px rgba(0,0,0,0.03); border: 1px solid var(--border); }
-    .chapter-title { font-size: 14px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
-    .page-content { font-size: 18px; line-height: 1.9; white-space: pre-line; text-align: justify; }
+    #reader { display: none; max-width: 1080px; margin: 0 auto; padding: 14px 20px 36px; }
+    .reader-top, .reader-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .book-spread { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; background: var(--card); border-radius: 10px; padding: 28px 36px; min-height: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid var(--border); position: relative; }
+    .book-spread::after { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 24px; transform: translateX(-50%); background: linear-gradient(to right, transparent, rgba(0,0,0,0.06), transparent); pointer-events: none; }
+    .page-col { display: flex; flex-direction: column; }
+    .chapter-title { font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; text-align: center; }
+    .page-content { font-size: 15px; line-height: 1.75; white-space: pre-line; text-align: justify; }
     .page-flip { animation: flipIn 0.25s ease; }
-    @keyframes flipIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes flipIn { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+    @media (max-width: 768px) { .book-spread { grid-template-columns: 1fr; padding: 22px; min-height: 380px; } .book-spread::after, #pageRightWrap { display: none; } }
     mark { border-radius: 3px; padding: 1px 2px; cursor: pointer; }
     .hl-yellow { background: #fff3a8; color: #222; } .hl-green { background: #c5f3c8; color: #222; }
     .hl-pink { background: #ffd1e6; color: #222; } .hl-blue { background: #c7e6ff; color: #222; }
     #hlBar { display: none; position: fixed; z-index: 60; background: var(--card); border: 1px solid var(--border); padding: 6px 10px; border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); gap: 6px; }
     #hlBar.show { display: flex; }
-    .note-list { margin-top: 16px; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; }
+    .note-list { margin-top: 14px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; }
     .note-item { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; }
-    input[type="text"], select { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; margin-top: 6px; }
+    input[type="text"], select { width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: inherit; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -50,7 +53,7 @@
     <div class="brand">📚 Thư viện văn học</div>
     <div class="controls">
       <button onclick="openBookModal()">＋ Thêm sách (PDF / EPUB)</button>
-      <button id="pianoBtn" onclick="togglePiano()">♫ Piano nhẹ nhàng</button>
+      <button id="pianoBtn" onclick="togglePiano()">♫ Piano</button>
       <label class="btn">＋ Nhạc MP3 <input type="file" id="musicInput" accept="audio/*" multiple hidden></label>
       <button onclick="document.body.classList.toggle('dark')">☾ Sáng/Tối</button>
     </div>
@@ -66,19 +69,28 @@
     <div class="reader-top">
       <button onclick="closeReader()">← Về kệ sách</button>
       <select id="chapterSelect" onchange="goChapter(this.value)" style="width:auto; max-width:220px; margin:0;"></select>
-      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+      <div style="display:flex; gap:5px; flex-wrap:wrap; align-items:center;">
+        <button onclick="changeFont(-1)">A-</button>
+        <button onclick="changeFont(1)">A+</button>
         <button onclick="saveBookmark()">🔖 Đánh dấu</button>
         <button onclick="goBookmark()">↪ Tới dấu</button>
         <button onclick="clearBookmark()">✕ Bỏ dấu</button>
       </div>
     </div>
     <div class="book-spread" id="bookSpread">
-      <div class="chapter-title" id="chTitle"></div>
-      <div class="page-content" id="pageContent"></div>
+      <div class="page-col">
+        <div class="chapter-title" id="chTitleLeft"></div>
+        <div class="page-content" id="pageLeft"></div>
+      </div>
+      <div class="page-col" id="pageRightWrap">
+        <div class="chapter-title" id="chTitleRight"></div>
+        <div class="page-content" id="pageRight"></div>
+      </div>
     </div>
     <div class="reader-bottom">
       <button onclick="turnPage(-1)">◀ Trang trước</button>
-      <span id="pageInfo" style="font-size:14px; color:var(--muted);"></span>
+      <span id="pageInfo" style="font-size:13.5px; color:var(--muted);"></span>
+      <span id="readTime" style="font-size:13.5px; color:var(--accent); font-weight:bold;">⏱ 00:00</span>
       <button onclick="turnPage(1)">Trang sau ▶</button>
     </div>
     <div class="note-list" id="noteList" style="display:none;"></div>
@@ -109,8 +121,9 @@
   <script src="books.js"></script>
   <script>
     if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    let userBooks = [], currentCat = "Tất cả", currentBook = null, chIdx = 0, pageIdx = 0, pages = [], selectedText = "";
+    let userBooks = [], currentCat = "Tất cả", currentBook = null, chIdx = 0, pageIdx = 0, pages = [], selectedText = "", activeHlPage = 0, fontSize = 15, readSec = 0, readTimer = null;
     const cats = ["Tất cả", "Của tôi", "Bạn bè", "Sách hay", "Sách của bạn"];
+    const isSpread = () => window.innerWidth > 768;
 
     function openDB() {
       return new Promise((res, rej) => {
@@ -146,13 +159,19 @@
         </div>`).join("") : `<p style="color:var(--muted);">Chưa có sách trong mục này.</p>`;
     }
 
+    function fmtTime(s) {
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+      const pad = n => String(n).padStart(2, "0");
+      return h ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+    }
+
     function openPreview(id) {
-      const b = allBooks().find(x => x.id === id), rc = localStorage.getItem("recent_" + id);
+      const b = allBooks().find(x => x.id === id), rc = localStorage.getItem("recent_" + id), t = Number(localStorage.getItem("time_" + id) || 0);
       document.getElementById("previewBody").innerHTML = `
         <h2 style="margin-top:0;">${b.title}</h2>
         <p style="color:var(--muted);">Tác giả: <strong>${b.author}</strong> · ${b.year || ''}</p>
         <p style="line-height:1.6;">${b.description || 'Tác phẩm lưu trữ trong thư viện cá nhân.'}</p>
-        ${rc ? `<p style="font-size:13px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(rc).ch + 1}, Trang ${JSON.parse(rc).p + 1}</p>` : ''}
+        ${rc ? `<p style="font-size:13px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(rc).ch + 1}, Trang ${JSON.parse(rc).p + 1} · ⏱ ${fmtTime(t)}</p>` : ''}
         <div style="display:flex; justify-content:space-between; margin-top:20px; gap:8px;">
           ${b.isLocal ? `<button onclick="removeUserBook('${b.id}')" style="color:#c0392b;">Xóa sách</button>` : ''}
           <div style="display:flex; gap:8px; margin-left:auto;">
@@ -165,11 +184,18 @@
     function closeModal(id) { document.getElementById(id).classList.remove("open"); }
     function openBookModal() { document.getElementById("bookModal").classList.add("open"); }
 
-    function paginate(text, n = 210) {
-      const w = (text || "").trim().split(/\s+/), out = [];
-      for (let i = 0; i < w.length; i += n) out.push(w.slice(i, i + n).join(" "));
+    function paginate(text, maxWords = 230) {
+      const paras = (text || "").split(/\n+/).map(p => p.trim()).filter(Boolean);
+      const out = []; let cur = [], count = 0;
+      for (const p of paras) {
+        const wc = p.split(/\s+/).length;
+        if (count + wc > maxWords && cur.length) { out.push(cur.join("\n\n")); cur = []; count = 0; }
+        cur.push(p); count += wc;
+      }
+      if (cur.length) out.push(cur.join("\n\n"));
       return out.length ? out : [""];
     }
+
     function startReading(id) {
       currentBook = allBooks().find(b => b.id === id);
       const sv = JSON.parse(localStorage.getItem("recent_" + id) || '{"ch":0,"p":0}');
@@ -177,43 +203,69 @@
       document.getElementById("chapterSelect").innerHTML = currentBook.chapters.map((c, i) => `<option value="${i}">${c.title}</option>`).join("");
       document.getElementById("libraryView").style.display = "none";
       document.getElementById("reader").style.display = "block";
+      readSec = Number(localStorage.getItem("time_" + id) || 0);
+      document.getElementById("readTime").textContent = "⏱ " + fmtTime(readSec);
+      clearInterval(readTimer);
+      readTimer = setInterval(() => {
+        readSec++; document.getElementById("readTime").textContent = "⏱ " + fmtTime(readSec);
+        if (readSec % 5 === 0) localStorage.setItem("time_" + currentBook.id, readSec);
+      }, 1000);
       renderPage();
     }
+
     const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    const getHLKey = () => `hl_${currentBook.id}_${chIdx}_${pageIdx}`;
+    const getHLKey = p => `hl_${currentBook.id}_${chIdx}_${p}`;
+
+    function renderHalf(pIdx, elId) {
+      if (pIdx >= pages.length) { document.getElementById(elId).innerHTML = ""; return []; }
+      let html = esc(pages[pIdx]);
+      const hls = JSON.parse(localStorage.getItem(getHLKey(pIdx)) || "[]");
+      hls.forEach((h, i) => {
+        const s = esc(h.text);
+        if (html.includes(s)) html = html.replace(s, `<mark class="hl-${h.color}" onclick="deleteHL(${pIdx},${i})" title="Bấm để xóa">${s}${h.note ? ' 📝' : ''}</mark>`);
+      });
+      document.getElementById(elId).innerHTML = html;
+      return hls.map((h, i) => ({...h, idx: i, p: pIdx})).filter(h => h.note);
+    }
 
     function renderPage() {
       document.getElementById("chapterSelect").value = chIdx;
       const ch = currentBook.chapters[chIdx]; pages = paginate(ch.content);
       if (pageIdx >= pages.length) pageIdx = 0;
-      document.getElementById("chTitle").textContent = `${currentBook.title} — ${ch.title}`;
-      let html = esc(pages[pageIdx]);
-      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
-      hls.forEach((h, i) => {
-        const s = esc(h.text);
-        if (html.includes(s)) html = html.replace(s, `<mark class="hl-${h.color}" onclick="deleteHL(${i})" title="Bấm để xóa">${s}${h.note ? ' 📝' : ''}</mark>`);
-      });
-      document.getElementById("pageContent").innerHTML = html;
+      if (isSpread() && pageIdx % 2 === 1) pageIdx--;
+      document.getElementById("chTitleLeft").textContent = `${currentBook.title} — ${ch.title}`;
+      document.getElementById("chTitleRight").textContent = isSpread() && pageIdx + 1 < pages.length ? `Trang ${pageIdx + 2}` : "";
+      const notes1 = renderHalf(pageIdx, "pageLeft");
+      const notes2 = isSpread() ? renderHalf(pageIdx + 1, "pageRight") : [];
       const sp = document.getElementById("bookSpread"); sp.classList.remove("page-flip"); void sp.offsetWidth; sp.classList.add("page-flip");
-      document.getElementById("pageInfo").textContent = `Trang ${pageIdx + 1} / ${pages.length}`;
+      const label = isSpread() && pageIdx + 1 < pages.length ? `Trang ${pageIdx + 1}–${pageIdx + 2} / ${pages.length}` : `Trang ${pageIdx + 1} / ${pages.length}`;
+      document.getElementById("pageInfo").textContent = label;
       localStorage.setItem("recent_" + currentBook.id, JSON.stringify({ ch: chIdx, p: pageIdx }));
-      const box = document.getElementById("noteList"), notes = hls.map((h, i) => ({...h, idx: i})).filter(h => h.note);
+      const box = document.getElementById("noteList"), notes = [...notes1, ...notes2];
       box.style.display = notes.length ? "block" : "none";
-      box.innerHTML = notes.length ? `<strong>✎ Ghi chú trang này:</strong>` + notes.map(h => `<div class="note-item"><span>"${h.text.slice(0,40)}..." → <em>${h.note}</em></span><button onclick="deleteHL(${h.idx})">✕</button></div>`).join("") : "";
+      box.innerHTML = notes.length ? `<strong>✎ Ghi chú trang này:</strong>` + notes.map(h => `<div class="note-item"><span>"${h.text.slice(0,40)}..." → <em>${h.note}</em></span><button onclick="deleteHL(${h.p},${h.idx})">✕</button></div>`).join("") : "";
     }
 
+    function changeFont(d) {
+      fontSize = Math.max(12, Math.min(22, fontSize + d));
+      document.querySelectorAll(".page-content").forEach(el => el.style.fontSize = fontSize + "px");
+    }
     function goChapter(i) { chIdx = Number(i); pageIdx = 0; renderPage(); }
     function turnPage(d) {
-      if (pageIdx + d >= 0 && pageIdx + d < pages.length) pageIdx += d;
+      const step = isSpread() ? 2 : 1;
+      if (pageIdx + d * step >= 0 && pageIdx + d * step < pages.length) pageIdx += d * step;
       else if (d > 0 && chIdx + 1 < currentBook.chapters.length) { chIdx++; pageIdx = 0; }
-      else if (d < 0 && chIdx > 0) { chIdx--; pages = paginate(currentBook.chapters[chIdx].content); pageIdx = pages.length - 1; }
+      else if (d < 0 && chIdx > 0) { chIdx--; pages = paginate(currentBook.chapters[chIdx].content); pageIdx = Math.max(0, pages.length - (isSpread() ? 2 : 1)); }
       else return;
       renderPage(); window.scrollTo({top: 0, behavior: 'smooth'});
     }
-    function closeReader() { document.getElementById("reader").style.display = "none"; document.getElementById("libraryView").style.display = "block"; renderShelf(); }
+    function closeReader() {
+      clearInterval(readTimer); if (currentBook) localStorage.setItem("time_" + currentBook.id, readSec);
+      document.getElementById("reader").style.display = "none"; document.getElementById("libraryView").style.display = "block"; renderShelf();
+    }
 
     function saveBookmark() {
-      const note = prompt("Ghi chú cho dấu trang (bỏ trống nếu không cần):", "") || "";
+      const note = prompt("Ghi chú cho dấu trang:", "") || "";
       localStorage.setItem("bm_" + currentBook.id, JSON.stringify({ ch: chIdx, p: pageIdx, note })); alert("🔖 Đã đánh dấu!");
     }
     function goBookmark() {
@@ -223,28 +275,30 @@
     }
     function clearBookmark() { localStorage.removeItem("bm_" + currentBook.id); alert("Đã bỏ dấu trang."); }
 
-    document.getElementById("pageContent").addEventListener("mouseup", e => {
-      const sel = window.getSelection().toString().trim();
-      if (sel.length > 1) {
-        selectedText = sel;
-        const bar = document.getElementById("hlBar");
-        bar.style.left = Math.min(e.clientX, window.innerWidth - 220) + "px";
-        bar.style.top = Math.max(10, e.clientY - 48) + "px";
-        bar.classList.add("show");
-      }
+    ["pageLeft", "pageRight"].forEach((id, offset) => {
+      document.getElementById(id).addEventListener("mouseup", e => {
+        const sel = window.getSelection().toString().trim();
+        if (sel.length > 1) {
+          selectedText = sel; activeHlPage = pageIdx + offset;
+          const bar = document.getElementById("hlBar");
+          bar.style.left = Math.min(e.clientX, window.innerWidth - 220) + "px";
+          bar.style.top = Math.max(10, e.clientY - 48) + "px";
+          bar.classList.add("show");
+        }
+      });
     });
     function hideHLBar() { document.getElementById("hlBar").classList.remove("show"); }
     function applyHL(color) {
       const note = prompt("Thêm ghi chú (bỏ trống nếu chỉ tô màu):", "") || "";
-      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
+      const hls = JSON.parse(localStorage.getItem(getHLKey(activeHlPage)) || "[]");
       hls.push({ text: selectedText, color, note });
-      localStorage.setItem(getHLKey(), JSON.stringify(hls));
+      localStorage.setItem(getHLKey(activeHlPage), JSON.stringify(hls));
       hideHLBar(); window.getSelection().removeAllRanges(); renderPage();
     }
-    function deleteHL(idx) {
+    function deleteHL(p, idx) {
       if (!confirm("Xóa highlight và ghi chú này?")) return;
-      const hls = JSON.parse(localStorage.getItem(getHLKey()) || "[]");
-      hls.splice(idx, 1); localStorage.setItem(getHLKey(), JSON.stringify(hls)); renderPage();
+      const hls = JSON.parse(localStorage.getItem(getHLKey(p)) || "[]");
+      hls.splice(idx, 1); localStorage.setItem(getHLKey(p), JSON.stringify(hls)); renderPage();
     }
 
     async function parseEPUB(file) {
@@ -260,11 +314,12 @@
       const man = {}; opf.querySelectorAll("manifest > item").forEach(it => man[it.getAttribute("id")] = decodeURIComponent(it.getAttribute("href") || ""));
       const chapters = [];
       for (const ir of opf.querySelectorAll("spine > itemref")) {
+        if (ir.getAttribute("linear") === "no") continue;
         const href = man[ir.getAttribute("idref")], entry = href && (zip.file(base + href) || zip.file(href));
         if (!entry) continue;
         const doc = dp.parseFromString(await entry.async("string"), "text/html");
         const title = doc.querySelector("h1, h2, h3, title")?.textContent.trim().slice(0, 80) || `Chương ${chapters.length + 1}`;
-        const paras = Array.from(doc.querySelectorAll("p, h1, h2, h3, h4, li")).map(el => el.textContent.trim()).filter(Boolean);
+        const paras = Array.from(doc.querySelectorAll("p, h1, h2, h3, h4, li, div")).filter(el => !el.querySelector("p, div")).map(el => el.textContent.trim()).filter(Boolean);
         const text = paras.length ? paras.join("\n\n") : (doc.body?.textContent.trim() || "");
         if (text.length > 20) chapters.push({ title, content: text });
       }
@@ -301,7 +356,7 @@
     let pianoTimer = null, audioCtx = null;
     function togglePiano() {
       const btn = document.getElementById("pianoBtn");
-      if (pianoTimer) { clearInterval(pianoTimer); pianoTimer = null; btn.textContent = "♫ Piano nhẹ nhàng"; return; }
+      if (pianoTimer) { clearInterval(pianoTimer); pianoTimer = null; btn.textContent = "♫ Piano"; return; }
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
       const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; let step = 0;
       pianoTimer = setInterval(() => {
@@ -310,7 +365,7 @@
         g.gain.setValueAtTime(0.06, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.4);
         osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5);
       }, 900);
-      btn.textContent = "⏸ Tạm dừng Piano";
+      btn.textContent = "⏸ Tạm dừng";
     }
     document.getElementById("musicInput").addEventListener("change", e => {
       const files = Array.from(e.target.files); if (!files.length) return;
