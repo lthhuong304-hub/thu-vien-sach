@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sách của Hương</title>
+  <title>bambi's book</title>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -32,7 +32,6 @@
     .modal-bg { display: none; position: fixed; inset: 0; background: rgba(20,14,8,0.6); z-index: 50; align-items: center; justify-content: center; padding: 16px; }
     .modal-bg.open { display: flex; }
     .modal { background: var(--card); color: var(--text); max-width: 480px; width: 100%; border-radius: 12px; padding: 24px; border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto; }
-    /* Giao diện đọc sách + Thanh công cụ dọc */
     #reader { display: none; max-width: 1160px; margin: 0 auto; padding: 20px 24px 40px; }
     .reader-layout { display: flex; gap: 22px; align-items: flex-start; }
     .side-pill { position: sticky; top: 20px; display: flex; flex-direction: column; gap: 8px; background: var(--card); border: 1px solid var(--border); padding: 10px 7px; border-radius: 32px; box-shadow: 0 8px 24px rgba(40,25,10,0.12); z-index: 10; }
@@ -68,8 +67,8 @@
 <body>
   <header>
     <div>
-      <span class="brand">✦ Thư viện Cổ tích ✦</span>
-      <span class="motto">per aspera, ad astra — lưu giữ những trang viết</span>
+      <span class="brand">✦ bambi's book ✦</span>
+      <span class="motto">per aspera, ad astra</span>
     </div>
     <div class="controls">
       <button onclick="openBookModal()">＋ Thêm sách (PDF / EPUB)</button>
@@ -125,13 +124,17 @@
     <button onclick="hideHLBar()">✕</button>
   </div>
 
+  <input type="file" id="changeCoverInput" accept="image/*" hidden>
   <div class="modal-bg" id="previewModal"><div class="modal" id="previewBody"></div></div>
 
   <div class="modal-bg" id="bookModal">
     <div class="modal">
       <h3 style="margin-top:0;">✦ Thêm sách PDF hoặc EPUB</h3>
       <p style="font-size:14px; color:var(--muted);">Sách lưu trực tiếp trên trình duyệt này (không tải lên máy chủ).</p>
-      <input type="file" id="bookFile" accept=".pdf,.epub,application/pdf,application/epub+zip" style="margin:6px 0 12px;">
+      <label style="font-size:13.5px;">Chọn file sách (.pdf hoặc .epub):</label>
+      <input type="file" id="bookFile" accept=".pdf,.epub,application/pdf,application/epub+zip" style="margin:4px 0 10px; display:block;">
+      <label style="font-size:13.5px;">Chọn ảnh bìa (không bắt buộc):</label>
+      <input type="file" id="bookCover" accept="image/*" style="margin:4px 0 10px; display:block;">
       <input type="text" id="bookTitle" placeholder="Tên sách (bỏ trống để tự lấy từ file)...">
       <input type="text" id="bookAuthor" placeholder="Tên tác giả...">
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
@@ -147,6 +150,7 @@
     let userBooks = [], currentCat = "Tất cả", currentBook = null, chIdx = 0, pageIdx = 0, pages = [], selectedText = "", activeHlPage = 0, fontSize = 16, readSec = 0, readTimer = null;
     const cats = ["Tất cả", "Của tôi", "Bạn bè", "Sách hay", "Sách của bạn"];
     const isSpread = () => window.innerWidth > 820;
+    const readImage = f => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
 
     function openDB() {
       return new Promise((res, rej) => {
@@ -163,6 +167,16 @@
     async function removeUserBook(id) {
       (await openDB()).transaction("books", "readwrite").objectStore("books").delete(id);
       userBooks = userBooks.filter(b => b.id !== id); closeModal("previewModal"); renderShelf();
+    }
+    function triggerChangeCover(id) {
+      const inp = document.getElementById("changeCoverInput");
+      inp.onchange = async () => {
+        if (!inp.files[0]) return;
+        const b = userBooks.find(x => x.id === id);
+        b.cover = await readImage(inp.files[0]);
+        await saveUserBook(b); renderShelf(); openPreview(id); inp.value = "";
+      };
+      inp.click();
     }
 
     function allBooks() { return [...(typeof BOOKS !== "undefined" ? BOOKS : []), ...userBooks]; }
@@ -193,8 +207,8 @@
         <p style="color:var(--muted);">Tác giả: <strong>${b.author}</strong> · ${b.year || ''}</p>
         <p style="line-height:1.65;">${b.description || 'Tác phẩm lưu trữ trong thư viện cá nhân.'}</p>
         ${rc ? `<p style="font-size:14px; color:var(--accent);">📖 Đọc gần đây: Chương ${JSON.parse(rc).ch + 1}, Trang ${JSON.parse(rc).p + 1} · ⏱ ${fmtTime(t)}</p>` : ''}
-        <div style="display:flex; justify-content:space-between; margin-top:20px; gap:8px;">
-          ${b.isLocal ? `<button onclick="removeUserBook('${b.id}')" style="color:#a83232;">Xóa sách</button>` : ''}
+        <div style="display:flex; justify-content:space-between; margin-top:20px; gap:6px; flex-wrap:wrap;">
+          ${b.isLocal ? `<div style="display:flex; gap:6px;"><button onclick="triggerChangeCover('${b.id}')">🖼 Đổi bìa</button><button onclick="removeUserBook('${b.id}')" style="color:#a83232;">Xóa</button></div>` : ''}
           <div style="display:flex; gap:8px; margin-left:auto;">
             <button onclick="closeModal('previewModal')">Đóng</button>
             <button class="primary" onclick="closeModal('previewModal');startReading('${b.id}')">Đọc ngay</button>
@@ -358,8 +372,10 @@
           chapters = [{ title: "Toàn văn", content: txt }];
         }
         if (!chapters.length) throw new Error("Empty");
+        const coverFile = document.getElementById("bookCover").files[0];
         const book = {
           id: "local_" + Date.now(), isLocal: true, category: "Sách của bạn", year: new Date().getFullYear(), color: "#5c3d2e",
+          cover: coverFile ? await readImage(coverFile) : "",
           title: document.getElementById("bookTitle").value.trim() || autoTitle || file.name.replace(/\.(pdf|epub)$/i, ""),
           author: document.getElementById("bookAuthor").value.trim() || autoAuthor || "Cá nhân",
           chapters
