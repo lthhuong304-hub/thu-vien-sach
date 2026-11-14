@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>bambi's book</title>
+  <title>bambi's book (hưn˖°)</title>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -17,8 +17,8 @@
     .motto { font-size: 13px; font-style: italic; color: var(--muted); display: block; margin-top: 2px; }
     .controls, .tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .tabs { padding: 16px 28px 6px; max-width: 1120px; margin: 0 auto; }
-    button { cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 6px 14px; border-radius: 20px; font-size: 14px; font-family: inherit; transition: 0.2s; }
-    button:hover { border-color: var(--gold); }
+    button, .btn { cursor: pointer; border: 1px solid var(--border); background: var(--card); color: var(--text); padding: 6px 14px; border-radius: 20px; font-size: 14px; font-family: inherit; transition: 0.2s; }
+    button:hover, .btn:hover { border-color: var(--gold); }
     button.primary, button.active { background: var(--accent); color: #fbf6eb; border-color: var(--accent); }
     .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 26px; padding: 16px 28px 50px; max-width: 1120px; margin: 0 auto; }
     .book-card { cursor: pointer; transition: transform 0.25s; }
@@ -67,11 +67,13 @@
 <body>
   <header>
     <div>
-      <span class="brand">✦ bambi's book ✦</span>
+      <span class="brand">✦ bambi's book (hưn˖°) ✦</span>
       <span class="motto">per aspera, ad astra</span>
     </div>
     <div class="controls">
       <button onclick="openBookModal()">＋ Thêm sách (PDF / EPUB)</button>
+      <button onclick="exportLibrary()">⬇ Xuất tủ sách</button>
+      <label class="btn">⬆ Nhập tủ sách <input type="file" id="importLibInput" accept=".json,application/json" hidden></label>
       <button onclick="document.body.classList.toggle('dark')">☾ Sáng / Tối</button>
     </div>
   </header>
@@ -119,8 +121,8 @@
   </div>
 
   <div id="hlBar">
-    <button onclick="applyHL('yellow')">🟡</button><button onclick="applyHL('green')">🟢</button>
-    <button onclick="applyHL('pink')">🌸</button><button onclick="applyHL('blue')">🔵</button>
+    <button onclick="applyHL('yellow')">🍰</button><button onclick="applyHL('green')">☕</button>
+    <button onclick="applyHL('pink')">🌸</button><button onclick="applyHL('blue')">🔖</button>
     <button onclick="hideHLBar()">✕</button>
   </div>
 
@@ -178,6 +180,30 @@
       };
       inp.click();
     }
+
+    function exportLibrary() {
+      const storage = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (/^(recent_|bm_|time_|hl_)/.test(k)) storage[k] = localStorage.getItem(k);
+      }
+      const blob = new Blob([JSON.stringify({ version: 1, userBooks, storage })], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "tu-sach-backup.json"; a.click();
+    }
+    document.getElementById("importLibInput").addEventListener("change", async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try {
+        const data = JSON.parse(await f.text());
+        for (const b of (data.userBooks || [])) {
+          await saveUserBook(b);
+          if (!userBooks.some(x => x.id === b.id)) userBooks.push(b);
+        }
+        Object.entries(data.storage || {}).forEach(([k, v]) => localStorage.setItem(k, v));
+        renderShelf(); alert("✓ Đã nhập tủ sách, dấu trang và ghi chú thành công!");
+      } catch { alert("File sao lưu không hợp lệ."); }
+      e.target.value = "";
+    });
 
     function allBooks() { return [...(typeof BOOKS !== "undefined" ? BOOKS : []), ...userBooks]; }
     function renderTabs() {
